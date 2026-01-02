@@ -1,0 +1,195 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.027583, 37.497942],
+          [127.028123, 37.498321],
+          [127.028654, 37.498702]
+        ]
+      },
+      "properties": {
+        "id": "path_001",
+        "width": 4.5,
+        "traffic": 12500,
+        "direction": "both",
+        "roadName": "강남대로",
+        "type": "main_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.028654, 37.498702],
+          [127.029145, 37.499012],
+          [127.029612, 37.499289]
+        ]
+      },
+      "properties": {
+        "id": "path_002",
+        "width": 4.2,
+        "traffic": 11200,
+        "direction": "both",
+        "roadName": "강남대로",
+        "type": "main_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.028123, 37.498321],
+          [127.028234, 37.497856],
+          [127.028345, 37.497412]
+        ]
+      },
+      "properties": {
+        "id": "path_003",
+        "width": 3.0,
+        "traffic": 7800,
+        "direction": "both",
+        "roadName": "역삼로",
+        "type": "side_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.029612, 37.499289],
+          [127.029823, 37.498876],
+          [127.030012, 37.498512]
+        ]
+      },
+      "properties": {
+        "id": "path_004",
+        "width": 2.5,
+        "traffic": 5600,
+        "direction": "both",
+        "roadName": "테헤란로",
+        "type": "side_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.027583, 37.497942],
+          [127.027234, 37.498145],
+          [127.026912, 37.498334]
+        ]
+      },
+      "properties": {
+        "id": "path_005",
+        "width": 3.5,
+        "traffic": 9200,
+        "direction": "both",
+        "roadName": "강남대로",
+        "type": "main_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.028345, 37.497412],
+          [127.028756, 37.497234],
+          [127.029123, 37.497089]
+        ]
+      },
+      "properties": {
+        "id": "path_006",
+        "width": 2.8,
+        "traffic": 6400,
+        "direction": "both",
+        "roadName": "논현로",
+        "type": "side_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.029145, 37.499012],
+          [127.028912, 37.499456],
+          [127.028701, 37.499823]
+        ]
+      },
+      "properties": {
+        "id": "path_007",
+        "width": 2.2,
+        "traffic": 4200,
+        "direction": "both",
+        "roadName": "역삼로 골목",
+        "type": "alley"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.030012, 37.498512],
+          [127.030456, 37.498234],
+          [127.030823, 37.498001]
+        ]
+      },
+      "properties": {
+        "id": "path_008",
+        "width": 3.2,
+        "traffic": 8100,
+        "direction": "both",
+        "roadName": "테헤란로",
+        "type": "main_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.026912, 37.498334],
+          [127.026645, 37.498678],
+          [127.026423, 37.498956]
+        ]
+      },
+      "properties": {
+        "id": "path_009",
+        "width": 3.8,
+        "traffic": 10300,
+        "direction": "both",
+        "roadName": "강남대로",
+        "type": "main_street"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [127.029123, 37.497089],
+          [127.029534, 37.496901],
+          [127.029912, 37.496734]
+        ]
+      },
+      "properties": {
+        "id": "path_010",
+        "width": 2.5,
+        "traffic": 5800,
+        "direction": "both",
+        "roadName": "논현로",
+        "type": "side_street"
+      }
+    }
+  ]
+}

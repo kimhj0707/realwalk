@@ -1,0 +1,155 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028123, 37.498234]
+      },
+      "properties": {
+        "id": "poi_001",
+        "place_name": "스타벅스 강남역점",
+        "category_name": "음식점 > 카페",
+        "category": "cafe",
+        "address": "서울시 강남구 역삼동 823-1",
+        "phone": "02-1234-5678"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028567, 37.498712]
+      },
+      "properties": {
+        "id": "poi_002",
+        "place_name": "커피빈 역삼점",
+        "category_name": "음식점 > 카페",
+        "category": "cafe",
+        "address": "서울시 강남구 역삼동 823-5",
+        "phone": "02-2345-6789"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029234, 37.499012]
+      },
+      "properties": {
+        "id": "poi_003",
+        "place_name": "투썸플레이스 역삼점",
+        "category_name": "음식점 > 카페",
+        "category": "cafe",
+        "address": "서울시 강남구 역삼동 825-1",
+        "phone": "02-3456-7890"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027456, 37.498456]
+      },
+      "properties": {
+        "id": "poi_004",
+        "place_name": "이디야커피 강남역점",
+        "category_name": "음식점 > 카페",
+        "category": "cafe",
+        "address": "서울시 강남구 역삼동 822-8",
+        "phone": "02-4567-8901"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029823, 37.498567]
+      },
+      "properties": {
+        "id": "poi_005",
+        "place_name": "할리스커피 역삼점",
+        "category_name": "음식점 > 카페",
+        "category": "cafe",
+        "address": "서울시 강남구 역삼동 827-1",
+        "phone": "02-5678-9012"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028345, 37.497512]
+      },
+      "properties": {
+        "id": "poi_006",
+        "place_name": "GS25 역삼점",
+        "category_name": "생활서비스 > 편의점",
+        "category": "convenience",
+        "address": "서울시 강남구 역삼동 824-2",
+        "phone": "02-6789-0123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027823, 37.498123]
+      },
+      "properties": {
+        "id": "poi_007",
+        "place_name": "CU 강남역점",
+        "category_name": "생활서비스 > 편의점",
+        "category": "convenience",
+        "address": "서울시 강남구 역삼동 823-1",
+        "phone": "02-7890-1234"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029456, 37.498234]
+      },
+      "properties": {
+        "id": "poi_008",
+        "place_name": "세븐일레븐 역삼점",
+        "category_name": "생활서비스 > 편의점",
+        "category": "convenience",
+        "address": "서울시 강남구 역삼동 826-3",
+        "phone": "02-8901-2345"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028912, 37.497234]
+      },
+      "properties": {
+        "id": "poi_009",
+        "place_name": "교촌치킨 역삼점",
+        "category_name": "음식점 > 치킨",
+        "category": "chicken",
+        "address": "서울시 강남구 역삼동 826-3",
+        "phone": "02-9012-3456"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027234, 37.498678]
+      },
+      "properties": {
+        "id": "poi_010",
+        "place_name": "BBQ 강남점",
+        "category_name": "음식점 > 치킨",
+        "category": "chicken",
+        "address": "서울시 강남구 역삼동 821-5",
+        "phone": "02-0123-4567"
+      }
+    }
+  ]
+}

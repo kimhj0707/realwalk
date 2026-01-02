@@ -1,0 +1,185 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027912, 37.498134]
+      },
+      "properties": {
+        "building_id": "bld_001",
+        "address": "서울시 강남구 역삼동 823-1",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "강남역 빌딩",
+        "business_type": "commercial"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028456, 37.498567]
+      },
+      "properties": {
+        "building_id": "bld_002",
+        "address": "서울시 강남구 역삼동 823-5",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "역삼 오피스텔",
+        "business_type": "office"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028234, 37.497756]
+      },
+      "properties": {
+        "building_id": "bld_003",
+        "address": "서울시 강남구 역삼동 824-2",
+        "entrance_type": "side",
+        "floor": "1F",
+        "building_name": "역삼 상가",
+        "business_type": "commercial"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029456, 37.499123]
+      },
+      "properties": {
+        "building_id": "bld_004",
+        "address": "서울시 강남구 역삼동 825-1",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "테헤란 타워",
+        "business_type": "office"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027345, 37.498245]
+      },
+      "properties": {
+        "building_id": "bld_005",
+        "address": "서울시 강남구 역삼동 822-8",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "강남 플라자",
+        "business_type": "commercial"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028867, 37.497312]
+      },
+      "properties": {
+        "building_id": "bld_006",
+        "address": "서울시 강남구 역삼동 826-3",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "논현 상가",
+        "business_type": "commercial"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029823, 37.498712]
+      },
+      "properties": {
+        "building_id": "bld_007",
+        "address": "서울시 강남구 역삼동 827-1",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "역삼 IT 센터",
+        "business_type": "office"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.026756, 37.498512]
+      },
+      "properties": {
+        "building_id": "bld_008",
+        "address": "서울시 강남구 역삼동 821-5",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "강남 메디컬 빌딩",
+        "business_type": "medical"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.029234, 37.496923]
+      },
+      "properties": {
+        "building_id": "bld_009",
+        "address": "서울시 강남구 역삼동 828-2",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "논현 오피스",
+        "business_type": "office"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.028701, 37.499656]
+      },
+      "properties": {
+        "building_id": "bld_010",
+        "address": "서울시 강남구 역삼동 829-1",
+        "entrance_type": "side",
+        "floor": "1F",
+        "building_name": "역삼 주상복합",
+        "business_type": "mixed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.030234, 37.498134]
+      },
+      "properties": {
+        "building_id": "bld_011",
+        "address": "서울시 강남구 역삼동 830-1",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "테헤란 비즈니스 센터",
+        "business_type": "office"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [127.027123, 37.497867]
+      },
+      "properties": {
+        "building_id": "bld_012",
+        "address": "서울시 강남구 역삼동 822-3",
+        "entrance_type": "main",
+        "floor": "1F",
+        "building_name": "강남 푸드코트",
+        "business_type": "commercial"
+      }
+    }
+  ]
+}

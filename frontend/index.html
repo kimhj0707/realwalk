@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealWalk - 실제 보행 동선 기반 상권 분석</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">🚶 RealWalk</h1>
+      <p class="tagline">실제 보행 동선 기반 상권 분석 (금천구 MVP)</p>
+    </div>
+  </header>
+
+  <!-- 메인 컨테이너 -->
+  <main class="main-container">
+    <!-- 입력 패널 -->
+    <aside class="input-panel">
+      <div class="panel-content">
+        <h2>상권 분석 시작</h2>
+
+        <form id="analysisForm" class="analysis-form">
+          <!-- 주소 입력 -->
+          <div class="form-group">
+            <label for="address">분석 위치</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              placeholder="예: 서울시 금천구 시흥대로 73길 70"
+              required
+            >
+            <p class="help-text">분석하고 싶은 상권의 주소를 입력하세요</p>
+          </div>
+
+          <!-- 업종 선택 -->
+          <div class="form-group">
+            <label for="business">업종</label>
+            <select id="business" name="business" required>
+              <option value="">선택하세요</option>
+              <option value="cafe">카페</option>
+              <option value="convenience">편의점</option>
+              <option value="chicken">치킨</option>
+              <option value="restaurant">음식점</option>
+              <option value="other">기타</option>
+            </select>
+          </div>
+
+          <!-- 분석 버튼 -->
+          <button type="submit" class="btn-primary">
+            🔍 분석 시작
+          </button>
+        </form>
+
+        <!-- 빈 상태 (분석 전) -->
+        <div id="emptyState" class="empty-state">
+          <div class="empty-state-icon">🗺️</div>
+          <div class="empty-state-title">위치를 선택해주세요</div>
+          <div class="empty-state-desc">
+            위 입력창에 주소를 입력하거나<br>
+            지도를 클릭하여 분석을 시작하세요
+          </div>
+        </div>
+
+        <!-- 결과 영역 -->
+        <div id="resultPanel" class="result-panel hidden">
+          <h3>분석 결과</h3>
+
+          <div class="result-guide">
+            <p><strong>💡 이렇게 해석하세요:</strong></p>
+            <p>• <strong>70점 이상</strong>: 추천 입지 ✅</p>
+            <p>• <strong>50-70점</strong>: 보통 입지 ⚠️</p>
+            <p>• <strong>50점 미만</strong>: 신중 검토 필요 ❌</p>
+          </div>
+
+          <!-- 종합 점수 -->
+          <div class="score-card">
+            <div class="score-label">종합 점수 (입지 적합도)</div>
+            <div class="score-value" id="finalScore">-</div>
+            <div class="score-max">/ 100점</div>
+
+            <!-- 근거 3개 -->
+            <div class="score-breakdown" id="scoreBreakdown" style="display: none;">
+              <div class="breakdown-item">
+                <div class="breakdown-icon">🚶</div>
+                <div class="breakdown-content">
+                  <div class="breakdown-label" title="일일 유동인구 추정치 기반 점수">유동량 💡</div>
+                  <div class="breakdown-value" id="accessibilityScore">-</div>
+                  <div class="breakdown-desc" id="accessibilityDesc">-</div>
+                </div>
+              </div>
+              <div class="breakdown-item">
+                <div class="breakdown-icon">⚔️</div>
+                <div class="breakdown-content">
+                  <div class="breakdown-label" title="주변 동일 업종 경쟁 강도">경쟁 💡</div>
+                  <div class="breakdown-value" id="competitionScore">-</div>
+                  <div class="breakdown-desc" id="competitionDesc">-</div>
+                </div>
+              </div>
+              <div class="breakdown-item">
+                <div class="breakdown-icon">🚇</div>
+                <div class="breakdown-content">
+                  <div class="breakdown-label" title="대중교통 및 주요 시설 접근 용이성">접근성 💡</div>
+                  <div class="breakdown-value" id="demandScore">-</div>
+                  <div class="breakdown-desc" id="demandDesc">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 추천 업종 카드 -->
+          <div id="recommendedBusinessSection" class="recommended-business-section">
+            <h4>💡 이 위치에 추천하는 업종</h4>
+            <div id="recommendedBusinessCards" class="recommended-business-cards"></div>
+          </div>
+
+          <!-- 동 정보 - 서비스 개선: 미시적 분석과 관련성 낮아 숨김 처리 -->
+          <!-- <div id="dongInfoSection" class="dong-info-section" style="display: none;">
+            <h4>📍 위치 정보</h4>
+            <div id="dongInfo" class="dong-info-content"></div>
+          </div> -->
+
+          <!-- 세부 지표 -->
+          <div class="metrics">
+            <div class="metric-item">
+              <span class="metric-label" title="하루 평균 이 지역을 지나가는 사람 수 (추정)">
+                일평균 유동량 💡
+              </span>
+              <span class="metric-value" id="dailyTraffic">-</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label" title="유동량 중 매장에 들어올 가능성이 있는 사람 수 (약 35%)">
+                체류 가능 유동 💡
+              </span>
+              <span class="metric-value" id="stayableTraffic">-</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label" title="반경 500m 내 같은 업종 매장 수">
+                경쟁 업체 수 💡
+              </span>
+              <span class="metric-value" id="competitorCount">-</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label" title="경쟁이 얼마나 치열한지 (높을수록 포화)">
+                시장 포화도 💡
+              </span>
+              <span class="metric-value" id="saturation">-</span>
+            </div>
+          </div>
+
+          <!-- 차트 시각화 섹션 -->
+          <div class="charts-section" id="chartsSection" style="display: none;">
+            <h4>📊 상세 분석 차트</h4>
+
+            <div class="charts-grid">
+              <!-- 점수 도넛 차트 -->
+              <div class="chart-card">
+                <h5>종합 점수</h5>
+                <div class="chart-container">
+                  <canvas id="scoreDonutChart"></canvas>
+                </div>
+              </div>
+
+              <!-- 점수 구성 요소 막대 그래프 -->
+              <div class="chart-card">
+                <h5>점수 구성 요소</h5>
+                <div class="chart-container">
+                  <canvas id="scoreBreakdownChart"></canvas>
+                </div>
+              </div>
+
+              <!-- 카테고리별 POI 분포 -->
+              <div class="chart-card">
+                <h5>주변 시설 분포</h5>
+                <div class="chart-container">
+                  <canvas id="poiDistributionChart"></canvas>
+                </div>
+              </div>
+
+              <!-- 카테고리별 상가 분포 -->
+              <div class="chart-card">
+                <h5>상가 업종 분포</h5>
+                <div class="chart-container">
+                  <canvas id="storeDistributionChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 주변 환경 상세 -->
+          <div class="detail-section">
+            <h4>🏢 주변 건물 정보</h4>
+            <div id="buildingDetails" class="detail-content">
+              <p class="detail-placeholder">분석을 실행하면 주변 건물 정보가 표시됩니다.</p>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4 title="Point of Interest - 주요 관심 시설 (카페, 지하철역, 학교 등)">📍 주변 시설 분포 💡</h4>
+            <div id="poiDetails" class="detail-content">
+              <p class="detail-placeholder">분석을 실행하면 주변 시설 분포가 표시됩니다.</p>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>🚇 인근 지하철역</h4>
+            <div id="subwayDetails" class="detail-content">
+              <p class="detail-placeholder">분석을 실행하면 인근 지하철역 정보가 표시됩니다.</p>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>🏪 주변 상가 정보</h4>
+            <div id="storeDetails" class="detail-content">
+              <p class="detail-placeholder">분석을 실행하면 주변 상가 정보가 표시됩니다.</p>
+            </div>
+          </div>
+
+          <!-- 추천 전략 -->
+          <div class="recommendation">
+            <h4>📋 추천 전략</h4>
+            <p id="recommendationText">-</p>
+          </div>
+
+          <!-- 분석 액션 버튼들 -->
+          <div class="action-buttons">
+            <button class="btn-primary" id="addCompareBtn" style="display: none;">
+              ➕ 비교 분석 추가
+            </button>
+            <button class="btn-secondary" id="resetBtn" style="display: none;">
+              🔄 초기화
+            </button>
+          </div>
+
+          <!-- 비교 분석 결과 -->
+          <div id="comparisonSection" class="comparison-section hidden">
+            <h4>📊 비교 분석</h4>
+            <div id="comparisonContent" class="comparison-content"></div>
+          </div>
+
+          <!-- PDF 다운로드 버튼 (추후 구현) -->
+          <button class="btn-secondary" id="downloadPDF" disabled>
+            📄 PDF 리포트 다운로드
+          </button>
+        </div>
+
+        <!-- 로딩 상태 -->
+        <div id="loadingSpinner" class="loading-spinner hidden">
+          <div class="spinner"></div>
+          <p>분석 중...</p>
+          <div class="loading-skeleton">
+            <div class="skeleton-item skeleton-score"></div>
+            <div class="skeleton-item skeleton-text"></div>
+            <div class="skeleton-item skeleton-text"></div>
+            <div class="skeleton-item skeleton-card"></div>
+          </div>
+        </div>
+
+        <!-- 에러 상태 (데이터 부족) -->
+        <div id="errorState" class="error-state hidden">
+          <div class="error-state-icon">📊</div>
+          <div class="error-state-title">데이터가 부족합니다</div>
+          <div class="error-state-desc">
+            이 반경에서 충분한 데이터를 찾을 수 없어요.<br>
+            반경을 늘려보시겠어요?
+          </div>
+          <button class="btn-secondary" onclick="document.querySelector('.radius-btn[data-radius=&quot;800&quot;]')?.click()">
+            반경 800m로 재분석
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 지도 영역 -->
+    <section class="map-section">
+      <div id="map" class="map-container"></div>
+
+      <!-- 반경 컨트롤 -->
+      <div class="radius-control" id="radiusControl" style="display: none;">
+        <div class="radius-control-label">분석 반경</div>
+        <div class="radius-buttons">
+          <button class="radius-btn" data-radius="300">
+            <span class="radius-value">300m</span>
+            <span class="radius-time">도보 4분</span>
+          </button>
+          <button class="radius-btn active" data-radius="500">
+            <span class="radius-value">500m</span>
+            <span class="radius-time">도보 6분</span>
+          </button>
+          <button class="radius-btn" data-radius="800">
+            <span class="radius-value">800m</span>
+            <span class="radius-time">도보 10분</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 지도 범례 -->
+      <div class="map-legend">
+        <h4>범례</h4>
+        <div class="legend-item">
+          <span class="legend-marker target">⭐</span>
+          <span>분석 위치</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-marker competitor">📍</span>
+          <span>경쟁 업체</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-line high">━━━</span>
+          <span>높은 유동</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-line medium">━━━</span>
+          <span>보통 유동</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-line low">━━━</span>
+          <span>낮은 유동</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="footer">
+    <p>&copy; 2024 LBS Tech - RealWalk. All rights reserved.</p>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Leaflet.heat for heatmap -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- Turf.js -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom JS -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

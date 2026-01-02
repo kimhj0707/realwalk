@@ -1,0 +1,71 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+package-lock.json
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.local
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# PDF outputs
+# =========================
+*.pdf
+reports/
+
+# =========================
+# Data files (large datasets)
+# =========================
+backend/data/*.geojson
+backend/data/*.json
+!backend/data/sample_*.json
+!backend/data/README.md
+
+# =========================
+# Markdown files
+# =========================
+# Ignore all markdown files
+**/*.md
+
+# Allow all dev logs starting with 202 (e.g. 2024-12-30_개발일지.md)
+!202*.md
+
+# Large datasets (public data)
+backend/data/
