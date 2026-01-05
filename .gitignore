@@ -69,3 +69,17 @@ backend/data/*.json
 
 # Large datasets (public data)
 backend/data/
+
+# =========================
+# Test files
+# =========================
+*_result.json
+test_*.json
+check_*.js
+nul
+backend/test*.js
+
+# =========================
+# Claude Code local settings
+# =========================
+.claude/settings.local.json
