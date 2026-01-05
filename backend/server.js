@@ -19,8 +19,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || '*'
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));  // PDF 생성을 위해 body size limit 증가
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // 정적 파일 제공 (프론트엔드)
 app.use(express.static(path.join(__dirname, '../frontend')));

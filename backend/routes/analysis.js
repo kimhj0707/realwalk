@@ -1,10 +1,13 @@
 import express from 'express';
-import { analyzeLocation, getDataStatus, reverseGeocode } from '../controllers/analysisController.js';
+import { analyzeLocation, getDataStatus, reverseGeocode, generatePDFReport } from '../controllers/analysisController.js';
 
 const router = express.Router();
 
 // 상권 분석 API
 router.post('/analyze', analyzeLocation);
+
+// PDF 리포트 생성 API
+router.post('/generate-pdf', generatePDFReport);
 
 // 데이터 상태 확인 API
 router.get('/data-status', getDataStatus);

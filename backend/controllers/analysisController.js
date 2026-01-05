@@ -5,13 +5,16 @@ import * as subwayDao from '../dao/subway.dao.js';
 import * as storeDao from '../dao/store.dao.js';
 import * as dongDao from '../dao/dong.dao.js';
 import * as walkingPathDao from '../dao/walkingPath.dao.js';
-import { calculateReachableArea, filterByNetworkDistance } from '../utils/networkAnalysis.js';
+import * as competitorDao from '../dao/competitor.dao.js';
+import { calculateReachableArea, filterByNetworkDistance, buildNetworkGraph } from '../utils/networkAnalysis.js';
+import { generatePDF } from '../utils/pdfGenerator.js';
 
 /**
  * 상권 분석 메인 함수
  * POST /api/analyze
  */
 export async function analyzeLocation(req, res) {
+  const apiStartTime = Date.now();
   try {
     const { address, business, coordinates, radius } = req.body;
 
@@ -76,8 +79,8 @@ export async function analyzeLocation(req, res) {
 
     console.log(`📊 주변 데이터: 건물 ${nearbyBuildings.length}개, POI ${nearbyPOIs.length}개, 지하철역 ${nearbySubways.length}개, 상가 ${nearbyStores.length}개, 보행로 ${walkingPaths.length}개, 동: ${dongInfo?.dong_nm || 'N/A'}`);
 
-    // 경쟁업체 필터링
-    const competitors = filterCompetitors(nearbyPOIs, business);
+    // 경쟁업체 필터링 (POI + STORE 통합 검색)
+    const competitors = await competitorDao.findCompetitorsHybrid(finalLat, finalLng, radiusMeters, business);
 
     // 동별 통계 가져오기 (dongInfo가 있는 경우)
     let dongStats = null;
@@ -101,6 +104,9 @@ export async function analyzeLocation(req, res) {
       radiusMeters
     );
 
+    const apiElapsed = Date.now() - apiStartTime;
+    console.log(`\n⏱️  [성능] === 전체 API 응답 시간: ${apiElapsed}ms ===\n`);
+
     // 결과 반환
     res.json({
       success: true,
@@ -110,7 +116,8 @@ export async function analyzeLocation(req, res) {
         business,
         ...analysisResult,
         dataSource: 'PostgreSQL (금천구)',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        performanceMs: apiElapsed  // 성능 측정 결과 포함
       }
     });
 
@@ -418,30 +425,39 @@ function performAnalysis(targetCoords, business, buildings, pois, competitors, s
   let networkFilteredCompetitors = competitors;
 
   if (walkingPaths.length > 0) {
+    const networkAnalysisStartTime = Date.now();
     console.log(`🔬 네트워크 분석 시작: ${walkingPaths.length}개 보행로 사용`);
 
     try {
-      // 실제 보행 가능 영역 계산
-      reachableArea = calculateReachableArea(targetCoords, walkingPaths, radiusMeters);
+      // 🚀 성능 최적화: 그래프를 한 번만 생성하고 재사용
+      const graph = buildNetworkGraph(walkingPaths);
+      console.log('✅ 그래프 생성 완료 - 재사용 모드');
+
+      // 실제 보행 가능 영역 계산 (그래프 재사용)
+      reachableArea = calculateReachableArea(targetCoords, walkingPaths, radiusMeters, graph);
       console.log('✅ 네트워크 기반 도달 가능 영역 계산 완료');
 
-      // 실제 보행 거리로 POI, 경쟁업체 필터링
+      // 실제 보행 거리로 POI, 경쟁업체 필터링 (그래프 재사용)
       // 건물은 geometry만 있고 lat/lng가 없어서 필터링 불가 - 직선거리 결과 사용
       networkFilteredPOIs = filterByNetworkDistance(
         targetCoords,
         pois,
         walkingPaths,
-        radiusMeters
+        radiusMeters,
+        graph
       );
 
       networkFilteredCompetitors = filterByNetworkDistance(
         targetCoords,
         competitors,
         walkingPaths,
-        radiusMeters
+        radiusMeters,
+        graph
       );
 
+      const networkAnalysisElapsed = Date.now() - networkAnalysisStartTime;
       console.log(`📊 네트워크 필터링 결과: 건물 ${buildings.length}(직선거리), POI ${pois.length}→${networkFilteredPOIs.length}, 경쟁업체 ${competitors.length}→${networkFilteredCompetitors.length}`);
+      console.log(`⏱️  [성능] 네트워크 분석 전체 (그래프 재사용): ${networkAnalysisElapsed}ms`);
     } catch (error) {
       console.error('⚠️ 네트워크 분석 실패, 직선거리 기반으로 대체:', error.message);
       // 실패 시 원본 데이터 사용
@@ -522,11 +538,16 @@ function performAnalysis(targetCoords, business, buildings, pois, competitors, s
     networkAnalysisEnabled: walkingPaths.length > 0,
     competitors: networkFilteredCompetitors.map(c => ({
       name: c.name,
+      branch: c.branch || null,
       category: c.category,
+      categoryMedium: c.category_medium || null,
+      categorySmall: c.category_small || null,
       lat: c.lat,
       lng: c.lng,
       distance: Math.round(c.networkDistance || c.distance),
-      networkDistance: c.networkDistance ? Math.round(c.networkDistance) : null
+      networkDistance: c.networkDistance ? Math.round(c.networkDistance) : null,
+      source: c.source || 'POI',  // POI or STORE
+      displayName: c.branch ? `${c.name} ${c.branch}` : c.name
     })),
     nearbyBuildings: networkFilteredBuildings.map(b => ({
       name: b.bldg_nm,
@@ -706,6 +727,66 @@ export async function reverseGeocode(req, res) {
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+}
+
+/**
+ * PDF 리포트 생성 및 다운로드
+ * POST /api/generate-pdf
+ */
+export async function generatePDFReport(req, res) {
+  const startTime = Date.now();
+
+  try {
+    const analysisData = req.body;
+
+    // 필수 데이터 검증
+    if (!analysisData || !analysisData.coordinates || !analysisData.business) {
+      return res.status(400).json({
+        success: false,
+        error: 'PDF 생성에 필요한 분석 데이터가 없습니다.'
+      });
+    }
+
+    console.log('📄 PDF 리포트 생성 요청:', {
+      address: analysisData.address,
+      business: analysisData.business,
+      score: analysisData.score
+    });
+
+    // PDF 생성
+    const pdfBuffer = await generatePDF(analysisData);
+
+    const elapsed = Date.now() - startTime;
+    console.log(`✅ PDF 리포트 생성 완료: ${elapsed}ms`);
+
+    // 파일명 생성 (한글 인코딩 처리)
+    const businessTypeMap = {
+      'cafe': '카페',
+      'convenience': '편의점',
+      'chicken': '치킨',
+      'restaurant': '음식점',
+      'bank': '은행',
+      'academy': '학원',
+      'pharmacy': '약국'
+    };
+    const businessName = businessTypeMap[analysisData.business] || analysisData.business;
+    const fileName = `RealWalk_${businessName}_분석리포트_${new Date().toISOString().split('T')[0]}.pdf`;
+    const encodedFileName = encodeURIComponent(fileName);
+
+    // PDF 응답
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.end(pdfBuffer, 'binary');
+
+  } catch (error) {
+    console.error('❌ PDF 생성 에러:', error);
+    res.status(500).json({
+      success: false,
+      error: 'PDF 생성 중 오류가 발생했습니다.',
+      message: error.message
     });
   }
 }

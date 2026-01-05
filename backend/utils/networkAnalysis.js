@@ -12,8 +12,12 @@ import * as turf from '@turf/turf';
  * 네트워크 그래프 생성
  *
  * 보행로 좌표들을 노드로 만들고 인접 좌표 간 거리를 엣지로 연결
+ *
+ * @param {Array} walkingPaths - 보행로 배열 (GeoJSON features)
+ * @returns {Object} 그래프 객체 {nodes: Map}
  */
-function buildNetworkGraph(walkingPaths) {
+export function buildNetworkGraph(walkingPaths) {
+  const startTime = Date.now();
   const nodes = new Map();
 
   const getKey = (lng, lat) => `${lng.toFixed(6)},${lat.toFixed(6)}`;
@@ -66,6 +70,9 @@ function buildNetworkGraph(walkingPaths) {
     }
   });
 
+  const elapsed = Date.now() - startTime;
+  console.log(`⏱️  [성능] 그래프 생성: ${elapsed}ms (노드 ${nodes.size}개, 보행로 ${walkingPaths.length}개)`);
+
   return { nodes };
 }
 
@@ -95,6 +102,7 @@ function findNearestNode(point, graph) {
  * 다익스트라 (단일 시작점 최단거리)
  */
 function computeShortestPaths(graph, startKey, maxDistance) {
+  const startTime = Date.now();
   const distances = new Map();
   const visited = new Set();
 
@@ -127,6 +135,9 @@ function computeShortestPaths(graph, startKey, maxDistance) {
     }
   }
 
+  const elapsed = Date.now() - startTime;
+  console.log(`⏱️  [성능] 최단경로 계산: ${elapsed}ms (도달 노드 ${distances.size}개, 최대거리 ${maxDistance}m)`);
+
   return distances;
 }
 
@@ -136,23 +147,25 @@ function computeShortestPaths(graph, startKey, maxDistance) {
  * @param {Object} startPoint - 시작점 {lat, lng}
  * @param {Array} walkingPaths - 보행로 배열 (GeoJSON features)
  * @param {number} maxDistanceMeters - 최대 보행 거리 (미터)
+ * @param {Object} prebuiltGraph - 미리 생성된 그래프 (선택사항, 성능 최적화용)
  * @returns {Object|null} 도달 가능 영역 (GeoJSON Geometry) 또는 null
  */
-export function calculateReachableArea(startPoint, walkingPaths, maxDistanceMeters = 500) {
+export function calculateReachableArea(startPoint, walkingPaths, maxDistanceMeters = 500, prebuiltGraph = null) {
+  const functionStartTime = Date.now();
   try {
     const start = turf.point([startPoint.lng, startPoint.lat]);
 
     if (!walkingPaths || walkingPaths.length === 0) {
-        console.warn('?? No walking paths provided, returning small buffer around start point.');
+        console.warn('⚠️  No walking paths provided, returning small buffer around start point.');
         const bufferedPoint = turf.buffer(start, 50, { units: 'meters' });
         return bufferedPoint.geometry;
     }
 
-    const graph = buildNetworkGraph(walkingPaths);
+    const graph = prebuiltGraph || buildNetworkGraph(walkingPaths);
     const startNode = findNearestNode(startPoint, graph);
 
     if (!startNode) {
-      console.warn('?? No network nodes found, returning buffer around start point.');
+      console.warn('⚠️  No network nodes found, returning buffer around start point.');
       const bufferedPoint = turf.buffer(start, maxDistanceMeters, { units: 'meters' });
       return bufferedPoint.geometry;
     }
@@ -168,7 +181,7 @@ export function calculateReachableArea(startPoint, walkingPaths, maxDistanceMete
     }
 
     if (reachablePoints.length === 0) {
-      console.warn('?? No reachable nodes within max distance, returning buffer around start point.');
+      console.warn('⚠️  No reachable nodes within max distance, returning buffer around start point.');
       const bufferedPoint = turf.buffer(start, maxDistanceMeters, { units: 'meters' });
       return bufferedPoint.geometry;
     }
@@ -177,21 +190,23 @@ export function calculateReachableArea(startPoint, walkingPaths, maxDistanceMete
     const buffered = turf.buffer(featureCollection, 20, { units: 'meters' });
 
     if (!buffered || !buffered.features || buffered.features.length === 0) {
-      console.error('?? Buffering reachable nodes resulted in no features.');
+      console.error('❌ Buffering reachable nodes resulted in no features.');
       return null;
     }
 
     const dissolved = turf.dissolve(buffered);
 
     if (dissolved && dissolved.features.length > 0 && dissolved.features[0].geometry) {
+      const elapsed = Date.now() - functionStartTime;
+      console.log(`⏱️  [성능] 도달가능영역 계산 전체: ${elapsed}ms (도달점 ${reachablePoints.length}개)`);
       return dissolved.features[0].geometry;
     }
 
-    console.error('?? Dissolve failed, returning null.');
+    console.error('❌ Dissolve failed, returning null.');
     return null;
 
   } catch (error) {
-    console.error('?? Error in calculateReachableArea:', error.message);
+    console.error('❌ Error in calculateReachableArea:', error.message);
     const fallbackPoint = turf.point([startPoint.lng, startPoint.lat]);
     const bufferedFallback = turf.buffer(fallbackPoint, 20, { units: 'meters' });
     return bufferedFallback ? bufferedFallback.geometry : null;
@@ -275,9 +290,12 @@ export function calculateNetworkDistance(pointA, pointB, walkingPaths) {
  * @param {Array} pois - POI 배열
  * @param {Array} walkingPaths - 보행로 배열
  * @param {number} maxDistance - 최대 거리 (미터)
+ * @param {Object} prebuiltGraph - 미리 생성된 그래프 (선택사항, 성능 최적화용)
  * @returns {Array} 필터링된 POI
  */
-export function filterByNetworkDistance(targetPoint, pois, walkingPaths, maxDistance = 500) {
+export function filterByNetworkDistance(targetPoint, pois, walkingPaths, maxDistance = 500, prebuiltGraph = null) {
+  const startTime = Date.now();
+
   if (!walkingPaths || walkingPaths.length === 0) {
     return pois
       .map(poi => {
@@ -295,7 +313,7 @@ export function filterByNetworkDistance(targetPoint, pois, walkingPaths, maxDist
       .sort((a, b) => a.networkDistance - b.networkDistance);
   }
 
-  const graph = buildNetworkGraph(walkingPaths);
+  const graph = prebuiltGraph || buildNetworkGraph(walkingPaths);
   const startNode = findNearestNode(targetPoint, graph);
   if (!startNode) {
     return pois.map(poi => ({ ...poi, networkDistance: Infinity }));
@@ -303,11 +321,11 @@ export function filterByNetworkDistance(targetPoint, pois, walkingPaths, maxDist
 
   const distances = computeShortestPaths(graph, startNode.key, maxDistance);
 
-  return pois
+  const result = pois
     .map(poi => {
       // Defensive check for valid coordinates
       if (typeof poi.lat !== 'number' || typeof poi.lng !== 'number') {
-        console.warn('?? Invalid coordinates for POI, skipping network distance calculation:', poi);
+        console.warn('⚠️  Invalid coordinates for POI, skipping network distance calculation:', poi);
         return {
           ...poi,
           networkDistance: Infinity,
@@ -332,5 +350,10 @@ export function filterByNetworkDistance(targetPoint, pois, walkingPaths, maxDist
     })
     .filter(poi => poi.networkDistance <= maxDistance)
     .sort((a, b) => a.networkDistance - b.networkDistance);
+
+  const elapsed = Date.now() - startTime;
+  console.log(`⏱️  [성능] 네트워크 거리 필터링: ${elapsed}ms (입력 ${pois.length}개 → 출력 ${result.length}개)`);
+
+  return result;
 }
 
