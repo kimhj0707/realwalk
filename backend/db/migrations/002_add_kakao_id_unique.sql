@@ -8,7 +8,16 @@ WHERE a.poi_id > b.poi_id
   AND a.kakao_id IS NOT NULL
   AND a.kakao_id = b.kakao_id;
 
--- 2. UNIQUE 제약조건 추가
-ALTER TABLE KOR.POI ADD CONSTRAINT poi_kakao_id_unique UNIQUE (kakao_id);
-
-COMMIT;
+-- 2. UNIQUE 제약조건 추가 (이미 존재하지 않을 경우에만)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'poi_kakao_id_unique'
+        AND conrelid = 'kor.poi'::regclass
+    ) THEN
+        ALTER TABLE KOR.POI ADD CONSTRAINT poi_kakao_id_unique UNIQUE (kakao_id);
+    END IF;
+END
+$$;

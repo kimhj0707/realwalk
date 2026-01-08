@@ -371,11 +371,7 @@ export function updateMap(map, results, radius = 500) {
       </div>
     `);
 
-    // 반경 원 제거 - 실제 도달 가능 영역(reachableArea)만 사용
-    // const reachCircle = L.circle(...) - REMOVED
-
     analysisLayer.addLayer(targetMarker);
-    // analysisLayer.addLayer(reachCircle); - REMOVED
   });
 
   analysisLayer.addTo(map);
@@ -407,11 +403,12 @@ export function updateMap(map, results, radius = 500) {
         }
       });
 
+      const networkDistText = building.networkDistance ? `${Math.round(building.networkDistance)}m` : 'N/A';
       geoJsonLayer.bindPopup(`
         <strong>${building.name || '건물'}</strong><br>
         ${building.address || ''}<br>
         층수: ${building.floors}층<br>
-        🚶 도보 거리: ${building.networkDistance || building.distance}m
+        🚶 도보 거리: ${networkDistText}
       `);
 
       buildingLayer.addLayer(geoJsonLayer);
@@ -431,10 +428,11 @@ export function updateMap(map, results, radius = 500) {
         icon: createCustomIcon(icon.emoji, icon.color, false)
       });
 
+      const networkDistText = poi.networkDistance ? `${Math.round(poi.networkDistance)}m` : 'N/A';
       poiMarker.bindPopup(`
         <strong>${poi.name}</strong><br>
         카테고리: ${poi.category}<br>
-        🚶 도보 거리: ${poi.networkDistance || poi.distance}m
+        🚶 도보 거리: ${networkDistText}
       `);
 
       // 모든 POI를 클러스터에 추가
@@ -478,11 +476,12 @@ export function updateMap(map, results, radius = 500) {
         icon: createCustomIcon('🎯', '#ef4444')
       });
 
+      const networkDistText = competitor.networkDistance ? `${Math.round(competitor.networkDistance)}m` : 'N/A';
       competitorMarker.bindPopup(`
         <strong>⚠️ 경쟁업체</strong><br>
         <strong>${competitor.name}</strong><br>
         카테고리: ${competitor.category}<br>
-        🚶 도보 거리: ${competitor.networkDistance || competitor.distance}m
+        🚶 도보 거리: ${networkDistText}
       `);
 
       competitorLayer.addLayer(competitorMarker);

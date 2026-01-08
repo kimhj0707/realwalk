@@ -364,7 +364,6 @@ function displayResults(result) {
   displayPOIDetails(result.nearbyPOIs);
   displaySubwayDetails(result.nearbySubways);
   displayStoreDetails(result.nearbyStores, result.storeDensity);
-  // displayDongInfo(result.dongInfo); // 서비스 개선: 동 정보 섹션 비활성화
 
   // 추천 업종 카드 표시
   displayRecommendedBusinesses(result);
@@ -456,7 +455,9 @@ function displayBuildingDetails(buildings) {
 
   const html = `
     <ul class="detail-list">
-      ${topBuildings.map(building => `
+      ${topBuildings.map(building => {
+        const networkDistText = building.networkDistance ? `${Math.round(building.networkDistance)}m` : 'N/A';
+        return `
         <li class="detail-item">
           <div class="detail-item-main">
             <span class="detail-item-name">${building.name || '이름 없음'}</span>
@@ -466,10 +467,10 @@ function displayBuildingDetails(buildings) {
           </div>
           <span class="detail-item-badge distance">
             ${building.networkDistance ? '🚶' : ''}
-            ${building.networkDistance ?? building.distance}m
+            ${networkDistText}
           </span>
         </li>
-      `).join('')}
+      `}).join('')}
     </ul>
     ${buildings.length > 5 ? `<p style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">외 ${buildings.length - 5}개 건물</p>` : ''}
   `;
@@ -552,7 +553,9 @@ function displaySubwayDetails(subways) {
 
   const html = `
     <ul class="detail-list">
-      ${subways.map(subway => `
+      ${subways.map(subway => {
+        const networkDistText = subway.networkDistance ? `${Math.round(subway.networkDistance)}m` : 'N/A';
+        return `
         <li class="detail-item">
           <div class="detail-item-main">
             <span class="detail-item-name">${subway.name}</span>
@@ -560,9 +563,12 @@ function displaySubwayDetails(subways) {
               ${subway.line} • 일평균 ${formatNumber(subway.dailyUsers)}명
             </span>
           </div>
-          <span class="detail-item-badge distance">${Math.round(subway.distance)}m</span>
+          <span class="detail-item-badge distance">
+            ${subway.networkDistance ? '🚶' : ''}
+            ${networkDistText}
+          </span>
         </li>
-      `).join('')}
+      `}).join('')}
     </ul>
   `;
 
@@ -604,7 +610,9 @@ function displayStoreDetails(stores, storeDensity) {
     </div>
 
     <ul class="detail-list">
-      ${displayStores.map(store => `
+      ${displayStores.map(store => {
+        const networkDistText = store.networkDistance ? `${Math.round(store.networkDistance)}m` : 'N/A';
+        return `
         <li class="detail-item">
           <div class="detail-item-main">
             <span class="detail-item-name">${store.name}${store.branch ? ` (${store.branch})` : ''}</span>
@@ -616,55 +624,15 @@ function displayStoreDetails(stores, storeDensity) {
           </div>
           <span class="detail-item-badge distance">
             ${store.networkDistance ? '🚶' : ''}
-            ${Math.round(store.networkDistance ?? store.distance)}m
+            ${networkDistText}
           </span>
         </li>
-      `).join('')}
+      `}).join('')}
     </ul>
 
     ${remainingCount > 0 ? `
       <p class="detail-more">외 ${remainingCount}개 상가 더보기...</p>
     ` : ''}
-  `;
-
-  container.innerHTML = html;
-}
-
-/**
- * 동 정보 표시
- */
-function displayDongInfo(dongInfo) {
-  const section = document.getElementById('dongInfoSection');
-  const container = document.getElementById('dongInfo');
-
-  if (!dongInfo) {
-    section.style.display = 'none';
-    return;
-  }
-
-  section.style.display = 'block';
-
-  const html = `
-    <div class="dong-info-card">
-      <div class="dong-info-main">
-        <h5>${dongInfo.dongNm}</h5>
-        <p class="dong-full-address">${dongInfo.fullNm}</p>
-      </div>
-      <div class="dong-stats">
-        <div class="dong-stat-item">
-          <span class="dong-stat-label">건물</span>
-          <span class="dong-stat-value">${formatNumber(dongInfo.buildingCount)}개</span>
-        </div>
-        <div class="dong-stat-item">
-          <span class="dong-stat-label">시설</span>
-          <span class="dong-stat-value">${formatNumber(dongInfo.poiCount)}개</span>
-        </div>
-        <div class="dong-stat-item">
-          <span class="dong-stat-label">상가</span>
-          <span class="dong-stat-value">${formatNumber(dongInfo.storeCount)}개</span>
-        </div>
-      </div>
-    </div>
   `;
 
   container.innerHTML = html;

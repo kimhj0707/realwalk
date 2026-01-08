@@ -164,6 +164,17 @@ export function calculateReachableArea(startPoint, walkingPaths, maxDistanceMete
     const graph = prebuiltGraph || buildNetworkGraph(walkingPaths);
     const startNode = findNearestNode(startPoint, graph);
 
+    // ================= DEBUG LOGGING =================
+    console.log('🐞🐞🐞 DEBUG: 네트워크 분석 시작점 🐞🐞🐞');
+    console.log('분석 시작점:', startPoint);
+    if (startNode) {
+      console.log('가장 가까운 노드:', startNode);
+    } else {
+      console.log('가장 가까운 노드를 찾지 못했습니다.');
+    }
+    console.log('🐞🐞🐞================================🐞🐞🐞');
+    // =================================================
+
     if (!startNode) {
       console.warn('⚠️  No network nodes found, returning buffer around start point.');
       const bufferedPoint = turf.buffer(start, maxDistanceMeters, { units: 'meters' });

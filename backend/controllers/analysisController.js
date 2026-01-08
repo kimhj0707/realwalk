@@ -77,6 +77,17 @@ export async function analyzeLocation(req, res) {
       walkingPathDao.findNearbyWalkingPaths(finalLat, finalLng, finalRadiusKm)
     ]);
 
+    // ================= DEBUG LOGGING =================
+    console.log('🐞🐞🐞 DEBUG: 좌표 데이터 확인 🐞🐞🐞');
+    console.log('분석 대상 좌표:', targetCoords);
+    if (walkingPaths.length > 0 && walkingPaths[0].geometry?.coordinates) {
+      console.log('첫 번째 보행로의 첫 좌표:', walkingPaths[0].geometry.coordinates[0]);
+    } else {
+      console.log('주변 보행로를 찾지 못했습니다.');
+    }
+    console.log('🐞🐞🐞================================🐞🐞🐞');
+    // =================================================
+
     console.log(`📊 주변 데이터: 건물 ${nearbyBuildings.length}개, POI ${nearbyPOIs.length}개, 지하철역 ${nearbySubways.length}개, 상가 ${nearbyStores.length}개, 보행로 ${walkingPaths.length}개, 동: ${dongInfo?.dong_nm || 'N/A'}`);
 
     // 경쟁업체 필터링 (POI + STORE 통합 검색)
@@ -423,6 +434,7 @@ function performAnalysis(targetCoords, business, buildings, pois, competitors, s
   let networkFilteredBuildings = buildings;
   let networkFilteredPOIs = pois;
   let networkFilteredCompetitors = competitors;
+  let debugInfo = {};
 
   if (walkingPaths.length > 0) {
     const networkAnalysisStartTime = Date.now();
@@ -458,6 +470,13 @@ function performAnalysis(targetCoords, business, buildings, pois, competitors, s
       const networkAnalysisElapsed = Date.now() - networkAnalysisStartTime;
       console.log(`📊 네트워크 필터링 결과: 건물 ${buildings.length}(직선거리), POI ${pois.length}→${networkFilteredPOIs.length}, 경쟁업체 ${competitors.length}→${networkFilteredCompetitors.length}`);
       console.log(`⏱️  [성능] 네트워크 분석 전체 (그래프 재사용): ${networkAnalysisElapsed}ms`);
+      
+      debugInfo = {
+        targetCoords,
+        walkingPathSample: walkingPaths.length > 0 ? walkingPaths[0].geometry.coordinates[0] : null,
+        startNode: findNearestNode(targetCoords, graph),
+      };
+
     } catch (error) {
       console.error('⚠️ 네트워크 분석 실패, 직선거리 기반으로 대체:', error.message);
       // 실패 시 원본 데이터 사용
@@ -599,7 +618,8 @@ lng: st.lng
       poiCount: dongStats?.poi_count || 0,
       storeCount: dongStats?.store_count || 0
     } : null,
-    recommendation
+    recommendation,
+    debugInfo
   };
 }
 

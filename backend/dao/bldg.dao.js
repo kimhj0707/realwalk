@@ -14,6 +14,7 @@ export async function findNearbyBuildings(lat, lng, radiusKm = 0.5) {
   const query = `
     SELECT
       bldg_id,
+      bd_mgt_sn,
       sig_cd,
       lotno_addr,
       road_nm_addr,
@@ -58,6 +59,7 @@ export async function findById(bldgId) {
   const query = `
     SELECT
       bldg_id,
+      bd_mgt_sn,
       sig_cd,
       lotno_addr,
       road_nm_addr,
@@ -84,6 +86,7 @@ export async function findAll(limit = 100, offset = 0) {
   const query = `
     SELECT
       bldg_id,
+      bd_mgt_sn,
       sig_cd,
       lotno_addr,
       road_nm_addr,
